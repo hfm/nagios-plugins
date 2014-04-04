@@ -65,7 +65,7 @@ smartctl=$(which smartctl)
 }
 
 for dev in $devices; do
-    val=$($smartctl -A $dev | awk '$1==5 {print $NF')
+    val=$($smartctl -A $dev | awk '$1==5 {print $NF}')
 
     [ -n "$val" ] || continue
     info="${info}${dev}:$val%"
