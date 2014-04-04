@@ -1,0 +1,90 @@
+#!/bin/bash
+#
+# ## Plugin for Nagios to monitor current pending sectors
+# Usage : ./check_pending_sector
+# Author: Okumura Takahiro <hfm.garden@gmail.com>
+#
+# ## Description:
+#
+# This plugin uses smartctl command to get the number of current pending sectors (S.M.A.R.T ID:197).
+#
+# Exit Codes
+# 0 OK
+# 1 Warning  Exceed the warning-threshold.
+# 2 Critical Exceed the critical-threchold.
+# 3 Unknown  Invalid command line arguments or could not determine used space
+
+LANG=C
+
+usage() {
+    cat <<EOT
+Usage: `basename $0` [-wl-c|-v] [device(e.g /dev/sda) [device..]]
+    -w  warning_threshold
+        set warning threshold (default 20)
+    -c  critical_threshold
+        set critical threshold (default 10)
+    -h  print the help message and exit
+EOT
+}
+
+# Exit codes
+state_ok=0
+state_warning=1
+state_critical=2
+state_unknown=3
+
+# Defaults
+warning_threshold="1"
+critical_threshold="1"
+
+while getopts "w:c:h" opt; do
+    case $opt in
+        w)
+            warning_threshold=$OPTARG
+            ;;
+        c)
+            critical_threshold=$OPTARG
+            ;;
+        *)
+            usage
+            exit $state_unknown
+            ;;
+    esac
+done
+
+if [ $# -gt 0 ];then
+    devices="$1"
+else
+    devices=$(awk '$4 ~ /^\wd\w$/ {print "/dev/"$4}' /proc/partitions)
+fi
+
+smartctl=$(which smartctl)
+[ -x "$smartctl" ] || {
+    echo "smartctl is not exist."
+    exit $state_unknown
+}
+
+for dev in $devices; do
+    val=$($smartctl -A $dev | awk '$1==197 {print $NF}')
+
+    [ -n "$val" ] || continue
+    info="${info}${dev}:$val%"
+
+    if [ $val -gt $critical_threshold ]; then
+        exitstatus=$state_critical
+        info="${info}(CRITICAL) "
+    elif [ $val -gt $warning_threshold ]; then
+        [ "$exitstatus" == $state_critical ] || exitstatus=$state_warning
+        info="${info}(WARNING) "
+    else
+        [ -n "$exitstatus" ] || exitstatus=$state_ok
+        info="${info}(OK) "
+    fi
+done
+
+[ -n "$exitstatus" ] || {
+    exitstatus=$state_unknown
+    info="params of Current_Pending_Sector is not found."
+}
+
+exit $exitstatus
