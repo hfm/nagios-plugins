@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # ## Plugin for Nagios to monitor bad sectors
 # Usage : ./check_bad_sector
