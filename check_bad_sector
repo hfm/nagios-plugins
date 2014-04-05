@@ -55,7 +55,7 @@ done
 if [ $# -gt 0 ];then
     devices="$1"
 else
-    devices=$(awk '$4 ~ /^\wd\w$/ {print "/dev/"$4}' /proc/partitions)
+    devices=$(awk '$4 ~ /^\wd\w+$/ {print "/dev/"$4}' /proc/partitions)
 fi
 
 smartctl=$(which smartctl)
