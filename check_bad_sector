@@ -18,7 +18,7 @@ LANG=C
 
 usage() {
     cat <<EOT
-Usage: `basename $0` [-wl-c|-v] [device(e.g /dev/sda) [device..]]
+Usage: `basename $0` [-w|-c|-v] [device(e.g /dev/sda) [device..]]
     -w  warning_threshold
         set warning threshold (default 20)
     -c  critical_threshold
