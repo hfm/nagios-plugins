@@ -87,4 +87,5 @@ done
     info="params of Current_Pending_Sector is not found."
 }
 
+echo $info
 exit $exitstatus

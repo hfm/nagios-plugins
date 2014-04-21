@@ -87,4 +87,5 @@ done
     info="Reallocated_Sector_Ct is not found."
 }
 
+echo $info
 exit $exitstatus
