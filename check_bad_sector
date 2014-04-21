@@ -68,7 +68,7 @@ for dev in $devices; do
     val=$($smartctl -A $dev -d auto | awk '$1==5 {print $NF}')
 
     [ -n "$val" ] || continue
-    info="${info}${dev}:$val%"
+    info="${info}${dev}:$val"
 
     if [ $val -gt $critical_threshold ]; then
         exitstatus=$state_critical
