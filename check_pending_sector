@@ -18,11 +18,13 @@ LANG=C
 
 usage() {
     cat <<EOT
-Usage: `basename $0` [-w|-c|-v] [device(e.g /dev/sda) [device..]]
+Usage: `basename $0` [-w|-c|-d|-v]
     -w  warning_threshold
         set warning threshold (default 20)
     -c  critical_threshold
         set critical threshold (default 10)
+    -d  device (e.g /dev/sda)
+        set device name (default all devices)
     -h  print the help message and exit
 EOT
 }
@@ -37,13 +39,16 @@ state_unknown=3
 warning_threshold="1"
 critical_threshold="1"
 
-while getopts "w:c:h" opt; do
+while getopts "w:c:d:h" opt; do
     case $opt in
         w)
             warning_threshold=$OPTARG
             ;;
         c)
             critical_threshold=$OPTARG
+            ;;
+        d)
+            devices=$OPTARG
             ;;
         *)
             usage
@@ -52,11 +57,7 @@ while getopts "w:c:h" opt; do
     esac
 done
 
-if [ $# -gt 0 ];then
-    devices="$1"
-else
-    devices=$(awk '$4 ~ /^[a-z]d[a-z]+$/ {print "/dev/"$4}' /proc/partitions)
-fi
+[ -z $devices ] && devices=$(awk '$4 ~ /^[a-z]d[a-z]+$/ {print "/dev/"$4}' /proc/partitions)
 
 smartctl=$(which smartctl)
 [ -x "$smartctl" ] || {
