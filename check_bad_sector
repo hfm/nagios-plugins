@@ -84,7 +84,7 @@ for dev in $devices; do
 done
 
 [ -n "$exitstatus" ] || {
-    exitstatus=$state_unknown
+    exitstatus=$state_ok
     info="Reallocated_Sector_Ct is not found."
 }
 
