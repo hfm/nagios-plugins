@@ -69,10 +69,10 @@ for dev in $devices; do
     val=$($smartctl -A $dev -d auto | awk '$1==197 {print $NF}')
     info="${info}${dev}:${val}"
 
-    if [ $val -gt $critical_threshold ]; then
+    if [[ $val -gt $critical_threshold ]]; then
         exitstatus=$state_critical
         info="${info}(CRITICAL) "
-    elif [ $val -gt $warning_threshold ]; then
+    elif [[ $val -gt $warning_threshold ]]; then
         [ "$exitstatus" == $state_critical ] || exitstatus=$state_warning
         info="${info}(WARNING) "
     else
