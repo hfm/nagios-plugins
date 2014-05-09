@@ -67,9 +67,7 @@ smartctl=$(which smartctl)
 
 for dev in $devices; do
     val=$($smartctl -A $dev -d auto | awk '$1==197 {print $NF}')
-
-    [ -n "$val" ] || continue
-    info="${info}${dev}:$val"
+    info="${info}${dev}:${val}"
 
     if [ $val -gt $critical_threshold ]; then
         exitstatus=$state_critical
@@ -78,8 +76,14 @@ for dev in $devices; do
         [ "$exitstatus" == $state_critical ] || exitstatus=$state_warning
         info="${info}(WARNING) "
     else
-        [ -n "$exitstatus" ] || exitstatus=$state_ok
-        info="${info}(OK) "
+        is_device_support_smart=$($smartctl -A $dev -d auto | grep '=== START OF READ SMART DATA SECTION ===')
+        if [ -n "$is_device_support_smart" ]; then
+            [ -n "$exitstatus" ] || exitstatus=$state_ok
+            info="${info}(OK) "
+        else
+            [ -n "$exitstatus" ] || exitstatus=$state_unknown
+            info="${info}(UNKNOWN) DEVICES DONT SUPPORT SMART"
+        fi
     fi
 done
 
