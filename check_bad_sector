@@ -75,14 +75,17 @@ for dev in $devices; do
     elif [[ $val -gt $warning_threshold ]]; then
         [ "$exitstatus" == $state_critical ] || exitstatus=$state_warning
         info="${info}(WARNING) "
+    elif [ -n "$val" ]; then
+        [ -n "$exitstatus" ] || exitstatus=$state_ok
+        info="${info}(OK) "
     else
         is_device_support_smart=$($smartctl -A $dev -d auto | grep '=== START OF READ SMART DATA SECTION ===')
         if [ -n "$is_device_support_smart" ]; then
             [ -n "$exitstatus" ] || exitstatus=$state_ok
-            info="${info}(OK) "
+            info="${info}(OK - DEVICE NOT SUPPORT SMART-ID:5) "
         else
             [ -n "$exitstatus" ] || exitstatus=$state_unknown
-            info="${info}(UNKNOWN) DEVICES DONT SUPPORT SMART"
+            info="${info}(UNKNOWN - DEVICE NOT SUPPORT SMART) "
         fi
     fi
 done
