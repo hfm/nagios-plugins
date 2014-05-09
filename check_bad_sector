@@ -67,26 +67,28 @@ smartctl=$(which smartctl)
 
 for dev in $devices; do
     val=$($smartctl -A $dev -d auto | awk '$1==5 {print $NF}')
+    info="${info}${dev}:${val}"
 
-    [ -n "$val" ] || continue
-    info="${info}${dev}:$val"
-
-    if [ $val -gt $critical_threshold ]; then
+    if [[ $val -gt $critical_threshold ]]; then
         exitstatus=$state_critical
         info="${info}(CRITICAL) "
-    elif [ $val -gt $warning_threshold ]; then
+    elif [[ $val -gt $warning_threshold ]]; then
         [ "$exitstatus" == $state_critical ] || exitstatus=$state_warning
         info="${info}(WARNING) "
-    else
+    elif [ -n "$val" ]; then
         [ -n "$exitstatus" ] || exitstatus=$state_ok
         info="${info}(OK) "
+    else
+        is_device_support_smart=$($smartctl -A $dev -d auto | grep '=== START OF READ SMART DATA SECTION ===')
+        if [ -n "$is_device_support_smart" ]; then
+            [ -n "$exitstatus" ] || exitstatus=$state_ok
+            info="${info}(OK - DEVICE NOT SUPPORT SMART-ID:5) "
+        else
+            [ -n "$exitstatus" ] || exitstatus=$state_unknown
+            info="${info}(UNKNOWN - DEVICE NOT SUPPORT SMART) "
+        fi
     fi
 done
-
-[ -n "$exitstatus" ] || {
-    exitstatus=$state_ok
-    info="Reallocated_Sector_Ct is not found."
-}
 
 echo $info
 exit $exitstatus
