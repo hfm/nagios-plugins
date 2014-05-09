@@ -90,10 +90,5 @@ for dev in $devices; do
     fi
 done
 
-[ -n "$exitstatus" ] || {
-    exitstatus=$state_ok
-    info="params of Current_Pending_Sector is not found."
-}
-
 echo $info
 exit $exitstatus
